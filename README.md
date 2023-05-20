@@ -26,13 +26,13 @@ On each new block, for each strategy (defined in `src/data/strategies.ts`):
 
  1. Determine the reward (USDT) for calling `harvestAndSwap()`
  2. Simulate a `harvestAndSwap()` transaction with the `eth_callBundle` method, sending to either a [mev-geth](https://github.com/flashbots/mev-geth) node or the Flashbots relay
- 3. If the simulation succeeds, determine the cost of the transaction
- 4. If profit > `MINIMUM_PROFIT`, send the harvest transaction to [MEVBlocker](https://mevblocker.io/).
+ 3. If the simulation succeeds, calculate the cost of the transaction
+ 4. The profit is equal to `reward - ((fee + bribe) * gas used)`. If profit > `MINIMUM_PROFIT`, send the harvest transaction to [MEVBlocker](https://mevblocker.io/).
  ## Contract (`contracts/helper.sol)`:
  Functions:
- - `randallAteMySandwich_dbohban()` - Harvest function. Calls `harvestAndSwap()` and then performs a balance check to ensure that you received the expected reward. This is useful if both you and a competitor send a harvest TX targeting the same block and they end up before you. Your transaction would revert, and ultimately would never land on chain as we send to a no reverts endpoint.
+ - `randallAteMySandwich_dbohban()` - Harvest function (Leading 0 function selector to save gas, pulled from [4byte.directory](https://www.4byte.directory/) - hence the odd name). Calls `harvestAndSwap()` and then performs a balance check to ensure that you received the expected reward. This is useful if both you and a competitor send a harvest TX targeting the same block and their transaction ends up before yours. Your transaction would revert, and ultimately would never land on chain as we send to a no reverts endpoint.
  - `getCallReward()` - Function to get the reward from harvesting a strategy.
 ## Potential Improvements
-- Support [OETH](https://www.oeth.com/), an ETH version of OUSD that has the same reward mechanism, but a different harvester contract. 
-	- Would require modifying and redeploying `contracts/helper.sol` with a `harvester` param in the harvest function to specify which harvester to use.  OR send the transaction directly to the [harvester](https://etherscan.io/address/0x0D017aFA83EAce9F10A8EC5B6E13941664A6785C) contract (however, you lose the revert advantage mentioned above)
-- Instead of using a custom contract to determine the harvest reward, use `debug_traceCall` with `diffMode`, and examine your USDT balance before and after to find the reward.
+- Support [OETH](https://www.oeth.com/), an ETH version of OUSD that has the same call reward mechanism, but a different harvester contract. 
+	- You could modify and redeploy `contracts/helper.sol` with a `harvester` param in the harvest function to specify which harvester to use.  OR send the transaction directly to the [harvester](https://etherscan.io/address/0x0D017aFA83EAce9F10A8EC5B6E13941664A6785C) contract (however, you lose the revert advantage mentioned above)
+- Instead of using a helper contract to find the harvest reward, use `debug_traceCall` with `diffMode`, and examine your USDT balance before and after to calculate the reward.
