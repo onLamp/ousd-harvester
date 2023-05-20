@@ -1,5 +1,5 @@
 # OUSD Harvester
-Simple long-tail MEV bot that harvests [OUSD](https://www.ousd.com/) strategies whenever profitable.
+A simple long-tail MEV bot that harvests [OUSD](https://www.ousd.com/) strategies whenever profitable.
 ## Setup 
 1. `git clone https://github.com/onlamp/ousd-harvester`
 2. `cd ousd-harvester`
